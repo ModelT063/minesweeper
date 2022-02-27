@@ -10,7 +10,7 @@ const int M_HEIGHT = 15;
 const int M_WIDTH = 20;
 const int H_BOMB = 25;
 const int H_HEIGHT = 50;
-const int H_WIDTH = 100;
+const int H_WIDTH = 25;
 
 char** initializeBoard(int difficulty){
 	int h = difficulty == 3 ? H_HEIGHT : (difficulty == 2 ? M_HEIGHT : E_HEIGHT);
@@ -98,29 +98,41 @@ int** initializeData(int difficulty){
 				}
 			}
 		}
-	}
-							
+	}						
 	return board;
 }
 
+//void updateGameBoard(struct UsrIn *usr, int difficulty, char** gameBoard, int** boardData){
+	
+	
 // maybe make this return a string instead of print everything at some point?
 void printBoard(char** gameBoard, int difficulty){
 	int h = difficulty == 3 ? H_HEIGHT : (difficulty == 2 ? M_HEIGHT : E_HEIGHT);
 	int w = difficulty == 3 ? H_WIDTH : (difficulty == 2 ? M_WIDTH : E_WIDTH);
 
-	for(int i = 0; i < (w * 2) + 1; i++) printf("-");
-	printf("\n");
+	// prints header of board
+	printf("\n    |");
+	for(int i = 0; i < w; i++) printf("%2d|", i);
+	printf("\n    ");
+	for(int j = 0; j < w; j++) printf("+--");
+	puts("+");
 
 	for(int i = 0; i < h; i++){
-		for(int j = 0; j < w; j++)
-			printf("|%c", gameBoard[j][i]);
-		puts("|");
-	}
+		// prints board data
+		printf("%4d", i);
+		for(int j = 0; j < w; j++) printf("|%2c", gameBoard[j][i]);
+		printf("|\n    ");
 
-	for(int i = 0; i < (w * 2) + 1; i++) printf("-");
-	printf("\n");
+		// prints horizontal dividers
+		for(int j = 0; j < w; j++) printf("+--");
+		puts("+");
+	}
 }
 
+void clear(void){
+	while(getchar() != '\n');
+}
+	
 void freeBoard(void** board, int difficulty){
 	int w = difficulty == 3 ? H_WIDTH : (difficulty == 2 ? M_WIDTH : E_WIDTH);
 	for(int i = 0; i < w; i++) free(board[i]);
