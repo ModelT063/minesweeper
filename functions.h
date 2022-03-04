@@ -1,18 +1,43 @@
 #ifndef functions_h
 #define functions_h
 
-typedef struct UsrIn{
+#include <stdbool.h>
+
+typedef struct {
 	char choice;
 	int d;
-	int x;
-	int y;
-} usr;
+	int w;
+	int h;
+} UsrIn;
 
-char** initializeBoard(int difficulty);
-int** initializeData(int difficulty);
-void updateGameBoard(struct UsrIn usr, int difficulty);
-void printBoard(char** gameBoard, int difficulty);
+typedef struct {
+	char disp;
+	int val;
+	bool vis;
+} tile;
+
+// allocates memory for the game based on the size the user chose
+tile** initializeBoard(int difficulty);
+
+// initializes the allocated data, adding bombs and number values
+void initializeData(tile** board, int difficulty);
+
+// changes the visibility of a tile or flags one, returns false if updates visibility of a bomb, true otherwise
+bool updateGameBoard(tile** board, UsrIn *usr);
+
+// checks to see if the game has been won
+bool gameWin(tile** gameBoard, int difficulty);
+
+// resets neccessary info for a new game to start
+void gameReset(tile** gameBoard, UsrIn *usr);
+
+// prints the board to the terminal
+void printBoard(tile** board, int difficulty);
+
+// clears input buffer and terminal screen
 void clear(void);
-void freeBoard(void** board, int difficulty);
+
+// frees the memory allocated by the game board
+void freeBoard(tile** board, int difficulty);
 
 #endif

@@ -1,10 +1,10 @@
+#include "functions.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include "functions.h"
 
 int main(void){
-	struct UsrIn usr = {'0', 0, 0, 0};
-	
+	UsrIn usr = {'0', 0, 0, 0};
+	bool lose = false;
 	// prints welcome message and difficulty selector	
 	printf("Welcome to Command Line Minesweeper!\n");
 	do{
@@ -14,8 +14,7 @@ int main(void){
 	} while(usr.d <= 0 || usr.d >= 4);
 	
 	// creates gameboard
-	char** gameBoard = initializeBoard(usr.d);
-	int** boardData = initializeData(usr.d);
+	tile** gameBoard = initializeBoard(usr.d);
 	
 	while(usr.choice != 'q'){
 		printBoard(gameBoard, usr.d);
@@ -23,12 +22,36 @@ int main(void){
 		printf("\nAction: ");
 		usr.choice = getchar();
 		// -48 to correct ascii value to int
-		usr.x = getchar() - 48;
-		usr.y = getchar() - 48;
+		usr.w = getchar() - 48;
+		usr.h = getchar() - 48;
 		clear();
+
+		// Write function to validate usr input
+		
+		lose = !updateGameBoard(gameBoard, &usr);
+		
+		// runs win/lose messages
+		if(gameWin(gameBoard, usr.d) || lose){
+			if(!lose)
+				printf("\nYOU WON! :D");
+			else
+				printf("\nYou Lose :(");
+		
+			// prompts user to play again	
+			while(usr.choice != 'y' && usr.choice != 'n'){
+				printBoard(gameBoard, usr.d);
+				printf("\nWould you like to play again?\n\nEnter 'y' or 'n': ");
+				usr.choice = getchar();
+				clear();
+			}
+		
+			if(usr.choice == 'n') 
+				usr.choice = 'q';
+			else
+				gameReset(gameBoard, &usr);
+		}
 	}
 
-	freeBoard((void**)gameBoard, usr.d);
-	freeBoard((void**)boardData, usr.d);
+	freeBoard(gameBoard, usr.d);
 	return 0;
 }
