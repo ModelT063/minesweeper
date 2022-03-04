@@ -3,10 +3,11 @@
 #include <stdio.h>
 
 int main(void){
-	UsrIn usr = {'0', 0, 0, 0};
+	UsrIn usr = {'y', 0, 0, 0};
 	bool lose = false;
 	// prints welcome message and difficulty selector	
 	printf("Welcome to Command Line Minesweeper!\n");
+//	do{
 	do{
 		printf("Choose your difficulty:\n\tEasy - 1\n\tMedium - 2\n\tHard - 3\n\nEnter: ");
 		scanf("%d", &usr.d);
@@ -45,13 +46,12 @@ int main(void){
 				clear();
 			}
 		
-			if(usr.choice == 'n') 
+			//if(usr.choice == 'n') 
 				usr.choice = 'q';
-			else
-				gameReset(gameBoard, &usr);
+			freeBoard(gameBoard, usr.d);
 		}
 	}
+//	} while(usr.choice == 'y');
 
-	freeBoard(gameBoard, usr.d);
 	return 0;
 }

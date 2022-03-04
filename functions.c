@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-const int E_BOMB = 10;
+const int E_BOMB = 1;
 const int E_HEIGHT = 10;
 const int E_WIDTH = 10;
 const int M_BOMB = 15;
@@ -43,7 +43,7 @@ void initializeData(tile** board, int difficulty){
 	// generates bombs																!!!!!!!!!!!!!!!REWORK BOMB MAKING ALGORITHM!!!!!!!!!!!!!
 	for(int i = 0; i < w; i++){
 		for(int j = 0; j < h; j++){
-			if(rand() % 100 < 10 && bomb_num < bomb){
+			if(rand() % 100 < 15 && bomb_num < bomb){
 				board[i][j].val = -1;
 				bomb_num++;
 			}
@@ -91,6 +91,9 @@ void initializeData(tile** board, int difficulty){
 }
 
 bool updateGameBoard(tile** gameBoard, UsrIn *usr){
+	// if space already selected, do nothing
+	if(gameBoard[usr->w][usr->h].vis) return true;
+
 	if(usr->choice == 'f')
 		gameBoard[usr->w][usr->h].disp = 'F';
 	else{
@@ -106,7 +109,71 @@ bool updateGameBoard(tile** gameBoard, UsrIn *usr){
 			gameBoard[usr->w][usr->h].vis = true;	
 		}
 	}
-																//!!!!!!!!! write recursion for blank squares using similar method to data init !!!
+
+	// Performs recursion to clear any 0s adjacent to user chosen 0 									
+	if(gameBoard[usr->w][usr->h].val == 0){
+		// defines a fake user input for recursion
+		UsrIn temp = {'r', usr->d, 0, 0};
+		int h = usr->d == 3 ? H_HEIGHT : (usr->d == 2 ? M_HEIGHT : E_HEIGHT);
+		int w = usr->d == 3 ? H_WIDTH : (usr->d == 2 ? M_WIDTH : E_WIDTH);
+			
+		// bottom left
+		if(usr->w != 0 && usr->h != 0){
+			temp.w = usr->w - 1;
+			temp.h = usr->h - 1;
+			updateGameBoard(gameBoard, &temp);
+		}	
+		
+		// left
+		if(usr->w != 0){
+	   		temp.w = usr->w - 1;
+			temp.h = usr->h;
+			updateGameBoard(gameBoard, &temp);
+		}			
+		
+		// top left
+		if(usr->w != 0 && usr->h != h - 1){
+			temp.w = usr->w - 1;
+			temp.h = usr->h + 1;
+			updateGameBoard(gameBoard, &temp);
+		}			
+
+		// top
+		if(usr->h != h - 1){
+			temp.w = usr->w;
+			temp.h = usr->h + 1;
+			updateGameBoard(gameBoard, &temp);
+		}
+
+		// top right
+		if(usr->w != w - 1 && usr->h != h - 1){
+			temp.w = usr->w + 1;
+			temp.h = usr->h + 1;
+			updateGameBoard(gameBoard, &temp);
+		}
+				
+		// right
+		if(usr->w != w - 1){
+			temp.w = usr->w + 1;
+			temp.h = usr->h;
+			updateGameBoard(gameBoard, &temp);
+		}
+				
+		// bottom right
+		if(usr->w != w - 1 && usr->h != 0){
+			temp.w = usr->w + 1;
+			temp.h = usr->h - 1;
+			updateGameBoard(gameBoard, &temp);
+		}		
+		
+		// bottom
+		if(usr->h != 0){
+			temp.w = usr->w;
+			temp.h = usr->h - 1;
+			updateGameBoard(gameBoard, &temp);
+		}
+	}
+	
 	return true;
 }
 
@@ -114,8 +181,10 @@ bool gameWin(tile** gameBoard, int difficulty){
 	int h = difficulty == 3 ? H_HEIGHT : (difficulty == 2 ? M_HEIGHT : E_HEIGHT);
 	int w = difficulty == 3 ? H_WIDTH : (difficulty == 2 ? M_WIDTH : E_WIDTH);
 
+	// goes through every tile, checks if it's visible
 	for(int i = 0; i < h; i++){
 		for(int j = 0; j < w; j++){
+			// if not visibile, return false unless it's a bomb
 			if(!gameBoard[i][j].vis && gameBoard[i][j].val != -1) 
 				return false;
 		}
@@ -125,7 +194,7 @@ bool gameWin(tile** gameBoard, int difficulty){
 
 void gameReset(tile** gameBoard, UsrIn *usr){
 	freeBoard(gameBoard, usr->d);
-
+	
 	do{
 		printf("Choose your difficulty:\n\tEasy - 1\n\tMedium - 2\n\tHard - 3\n\nEnter: ");
 		scanf("%d", &usr->d);
@@ -135,7 +204,6 @@ void gameReset(tile** gameBoard, UsrIn *usr){
 	gameBoard = initializeBoard(usr->d);
 }
 
-// maybe make this return a string instead of print everything at some point?
 void printBoard(tile** gameBoard, int difficulty){
 	int h = difficulty == 3 ? H_HEIGHT : (difficulty == 2 ? M_HEIGHT : E_HEIGHT);
 	int w = difficulty == 3 ? H_WIDTH : (difficulty == 2 ? M_WIDTH : E_WIDTH);
