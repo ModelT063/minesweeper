@@ -2,25 +2,26 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <time.h>
 
-const int E_BOMB = 1;
-const int E_HEIGHT = 10;
-const int E_WIDTH = 10;
-const int M_BOMB = 15;
-const int M_HEIGHT = 15;
-const int M_WIDTH = 20;
-const int H_BOMB = 25;
-const int H_HEIGHT = 15;
-const int H_WIDTH = 50;
+const int E_BOMB = 10;
+const int E_HEIGHT = 9;
+const int E_WIDTH = 9;
+const int M_BOMB = 40;
+const int M_HEIGHT = 16;
+const int M_WIDTH = 16;
+const int H_BOMB = 99;
+const int H_HEIGHT = 16;
+const int H_WIDTH = 30;
 
 tile** initializeBoard(int difficulty){
 	int h = difficulty == 3 ? H_HEIGHT : (difficulty == 2 ? M_HEIGHT : E_HEIGHT);
 	int w = difficulty == 3 ? H_WIDTH : (difficulty == 2 ? M_WIDTH : E_WIDTH);
 	int bomb = difficulty == 3 ? H_BOMB : (difficulty == 2 ? M_BOMB : E_BOMB);
 	
-	tile** board = (tile**)malloc(sizeof(tile*) * w);
+	tile** board = malloc(w * sizeof(tile*));
 	for(int i = 0; i < w; i++){
-		board[i] = (tile*)malloc(sizeof(tile) * h);
+		board[i] = malloc(h * sizeof(tile));
 		
 		for(int j = 0; j < h; j++){
 			board[i][j].disp = '#';
@@ -37,19 +38,24 @@ tile** initializeBoard(int difficulty){
 void initializeData(tile** board, int difficulty){
 	int h = difficulty == 3 ? H_HEIGHT : (difficulty == 2 ? M_HEIGHT : E_HEIGHT);
 	int w = difficulty == 3 ? H_WIDTH : (difficulty == 2 ? M_WIDTH : E_WIDTH);
+	
 	int bomb = difficulty == 3 ? H_BOMB : (difficulty == 2 ? M_BOMB : E_BOMB);
+	int fraction_bomb = (h * w) / bomb + 1;
 	int bomb_num = 0;
-	
-	// generates bombs																!!!!!!!!!!!!!!!REWORK BOMB MAKING ALGORITHM!!!!!!!!!!!!!
-	for(int i = 0; i < w; i++){
-		for(int j = 0; j < h; j++){
-			if(rand() % 100 < 15 && bomb_num < bomb){
-				board[i][j].val = -1;
-				bomb_num++;
+	srand(time(0));
+
+	// generates bombs
+	while(bomb_num < bomb){
+		for(int i = 0; i < w; i++){
+			for(int j = 0; j < h; j++){
+				if(rand() % (h * w) < fraction_bomb && bomb_num < bomb){
+					board[i][j].val = -1;
+					bomb_num++;
+				}
 			}
-		}
-	}	
-	
+		}	
+	}
+
 	// fills in proper numbers
 	for(int i = 0; i < w; i++){
 		for(int j = 0; j < h; j++){
@@ -94,8 +100,12 @@ bool updateGameBoard(tile** gameBoard, UsrIn *usr){
 	// if space already selected, do nothing
 	if(gameBoard[usr->w][usr->h].vis) return true;
 
-	if(usr->choice == 'f')
-		gameBoard[usr->w][usr->h].disp = 'F';
+	if(usr->choice == 'f'){
+		if(gameBoard[usr->w][usr->h].disp == 'F')
+			gameBoard[usr->w][usr->h].disp = '#';
+		else
+			gameBoard[usr->w][usr->h].disp = 'F';
+	}
 	else{
 		// if user selects a bomb space
 		if(gameBoard[usr->w][usr->h].val == -1){
@@ -173,7 +183,6 @@ bool updateGameBoard(tile** gameBoard, UsrIn *usr){
 			updateGameBoard(gameBoard, &temp);
 		}
 	}
-	
 	return true;
 }
 
@@ -182,8 +191,8 @@ bool gameWin(tile** gameBoard, int difficulty){
 	int w = difficulty == 3 ? H_WIDTH : (difficulty == 2 ? M_WIDTH : E_WIDTH);
 
 	// goes through every tile, checks if it's visible
-	for(int i = 0; i < h; i++){
-		for(int j = 0; j < w; j++){
+	for(int i = 0; i < w; i++){
+		for(int j = 0; j < h; j++){
 			// if not visibile, return false unless it's a bomb
 			if(!gameBoard[i][j].vis && gameBoard[i][j].val != -1) 
 				return false;
@@ -192,16 +201,44 @@ bool gameWin(tile** gameBoard, int difficulty){
 	return true;
 }
 
+void boardReveal(tile** gameBoard, int difficulty){
+	int h = difficulty == 3 ? H_HEIGHT : (difficulty == 2 ? M_HEIGHT : E_HEIGHT);
+	int w = difficulty == 3 ? H_WIDTH : (difficulty == 2 ? M_WIDTH : E_WIDTH);
+	
+	for(int i = 0; i < w; i++){	
+		for(int j = 0; j < h; j++){
+			if(gameBoard[i][j].val == -1)
+				gameBoard[i][j].disp = 'B'; 
+			else
+				gameBoard[i][j].disp = gameBoard[i][j].val + '0'; 
+		}
+	}
+}
+
 void gameReset(tile** gameBoard, UsrIn *usr){
 	freeBoard(gameBoard, usr->d);
-	
+	// reprompts user for difficulty // DOESNT DO ANYTHING YET NEED TO SOMEHOW REALLOCATE LARGER/SMALLER BOARD SIZE 
 	do{
 		printf("Choose your difficulty:\n\tEasy - 1\n\tMedium - 2\n\tHard - 3\n\nEnter: ");
 		scanf("%d", &usr->d);
 		clear();
 	} while(usr->d <= 0 || usr->d >= 4);
 	
-	gameBoard = initializeBoard(usr->d);
+	int h = usr->d == 3 ? H_HEIGHT : (usr->d == 2 ? M_HEIGHT : E_HEIGHT);
+	int w = usr->d == 3 ? H_WIDTH : (usr->d == 2 ? M_WIDTH : E_WIDTH);
+	// reallocates based on new board size
+	*gameBoard = realloc(*gameBoard, sizeof(tile*) * w);
+	for(int i = 0; i < w; i++){
+		gameBoard[i] = malloc(sizeof(tile) * h);
+	
+		for(int j = 0; j < h; j++){
+			gameBoard[i][j].disp = '#';
+			gameBoard[i][j].val = 0;
+			gameBoard[i][j].vis = false;
+		}	
+	}
+	
+	initializeData(gameBoard, usr->d);
 }
 
 void printBoard(tile** gameBoard, int difficulty){
@@ -270,12 +307,13 @@ void clear(void){
 	// clears input buffer
 	while(getchar() != '\n');
 	// clears the terminal 
-	printf("\e[1;1H\e[2J");
+	printf("\e[1;1H\e[2J\e[3J");
 }
 	
 void freeBoard(tile** board, int difficulty){
 	int w = difficulty == 3 ? H_WIDTH : (difficulty == 2 ? M_WIDTH : E_WIDTH);
 	for(int i = 0; i < w; i++) free(board[i]);
 	free(board);
+	board = NULL;
 }
 

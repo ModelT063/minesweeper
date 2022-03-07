@@ -7,7 +7,6 @@ int main(void){
 	bool lose = false;
 	// prints welcome message and difficulty selector	
 	printf("Welcome to Command Line Minesweeper!\n");
-//	do{
 	do{
 		printf("Choose your difficulty:\n\tEasy - 1\n\tMedium - 2\n\tHard - 3\n\nEnter: ");
 		scanf("%d", &usr.d);
@@ -22,13 +21,14 @@ int main(void){
 		
 		printf("\nAction: ");
 		usr.choice = getchar();
-		// -48 to correct ascii value to int
-		usr.w = getchar() - 48;
-		usr.h = getchar() - 48;
+		printf("Column: ");
+		scanf("%d", &usr.w);
+		printf("Row: ");
+		scanf("%d", &usr.h);
 		clear();
 
 		// Write function to validate usr input
-		
+	
 		lose = !updateGameBoard(gameBoard, &usr);
 		
 		// runs win/lose messages
@@ -40,18 +40,23 @@ int main(void){
 		
 			// prompts user to play again	
 			while(usr.choice != 'y' && usr.choice != 'n'){
+				// reveals and prints the finished board
+				boardReveal(gameBoard, usr.d);
 				printBoard(gameBoard, usr.d);
+				
 				printf("\nWould you like to play again?\n\nEnter 'y' or 'n': ");
 				usr.choice = getchar();
 				clear();
 			}
 		
-			//if(usr.choice == 'n') 
+			if(usr.choice == 'n'){
 				usr.choice = 'q';
-			freeBoard(gameBoard, usr.d);
+				freeBoard(gameBoard, usr.d);
+			}
+			else{ 
+				gameReset(gameBoard, &usr);}
 		}
 	}
-//	} while(usr.choice == 'y');
 
 	return 0;
 }

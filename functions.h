@@ -4,15 +4,22 @@
 #include <stdbool.h>
 
 typedef struct {
+	// a single char representing any current user input
 	char choice;
+	// the difficulty of the current game
 	int d;
+	// user selection of a tile
 	int w;
 	int h;
 } UsrIn;
 
+// a single square on the minesweeper board
 typedef struct {
+	// the display character, visible to user
 	char disp;
+	// the true value of the tile, regardless of display
 	int val;
+	// true if the true value is displayed to user
 	bool vis;
 } tile;
 
@@ -27,6 +34,9 @@ bool updateGameBoard(tile** board, UsrIn *usr);
 
 // checks to see if the game has been won
 bool gameWin(tile** gameBoard, int difficulty);
+
+// displays all values on the board at the end of the game
+void boardReveal(tile** gameBoard, int difficulty);
 
 // resets neccessary info for a new game to start
 void gameReset(tile** gameBoard, UsrIn *usr);
