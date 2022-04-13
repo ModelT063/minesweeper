@@ -4,15 +4,17 @@
 #include <stdbool.h>
 #include <time.h>
 
-const int E_BOMB = 10;
-const int E_HEIGHT = 9;
-const int E_WIDTH = 9;
-const int M_BOMB = 40;
-const int M_HEIGHT = 16;
-const int M_WIDTH = 16;
-const int H_BOMB = 99;
-const int H_HEIGHT = 16;
-const int H_WIDTH = 30;
+const int E_BOMB = 10,
+		  E_HEIGHT = 9,
+		  E_WIDTH = 9,
+		  
+		  M_BOMB = 40,
+		  M_HEIGHT = 16,
+		  M_WIDTH = 16,
+		  
+		  H_BOMB = 99,
+		  H_HEIGHT = 16,
+		  H_WIDTH = 30;
 
 tile** initializeBoard(int difficulty){
 	int h = difficulty == 3 ? H_HEIGHT : (difficulty == 2 ? M_HEIGHT : E_HEIGHT);
@@ -100,28 +102,30 @@ bool updateGameBoard(tile** gameBoard, UsrIn *usr){
 	// if space already selected, do nothing
 	if(gameBoard[usr->w][usr->h].vis) return true;
 
+	// flag action 
 	if(usr->choice == 'f'){
 		if(gameBoard[usr->w][usr->h].disp == 'F')
 			gameBoard[usr->w][usr->h].disp = '#';
 		else
 			gameBoard[usr->w][usr->h].disp = 'F';
 	}
-	else{
+	// reveal tile action
+	else if(usr->choice == 'r'){
 		// if user selects a bomb space
 		if(gameBoard[usr->w][usr->h].val == -1){
 			gameBoard[usr->w][usr->h].disp = 'B';
 			gameBoard[usr->w][usr->h].vis = true;	
 			return false;
 		}
-		else{
-			// user selects a normal tile
+		// if the tile isn't flagged, allow it to be revealed
+		else if(gameBoard[usr->w][usr->h].disp != 'F'){
 			gameBoard[usr->w][usr->h].disp = gameBoard[usr->w][usr->h].val + '0'; 
 			gameBoard[usr->w][usr->h].vis = true;	
 		}
 	}
 
 	// Performs recursion to clear any 0s adjacent to user chosen 0 									
-	if(gameBoard[usr->w][usr->h].val == 0){
+	if(usr->choice == 'r' && gameBoard[usr->w][usr->h].val == 0){
 		// defines a fake user input for recursion
 		UsrIn temp = {'r', usr->d, 0, 0};
 		int h = usr->d == 3 ? H_HEIGHT : (usr->d == 2 ? M_HEIGHT : E_HEIGHT);
@@ -216,8 +220,8 @@ void boardReveal(tile** gameBoard, int difficulty){
 }
 
 void gameReset(tile** gameBoard, UsrIn *usr){
-	freeBoard(gameBoard, usr->d);
-	// reprompts user for difficulty // DOESNT DO ANYTHING YET NEED TO SOMEHOW REALLOCATE LARGER/SMALLER BOARD SIZE 
+	//freeBoard(gameBoard, usr->d);
+	// reprompts user for difficulty
 	do{
 		printf("Choose your difficulty:\n\tEasy - 1\n\tMedium - 2\n\tHard - 3\n\nEnter: ");
 		scanf("%d", &usr->d);
@@ -227,9 +231,9 @@ void gameReset(tile** gameBoard, UsrIn *usr){
 	int h = usr->d == 3 ? H_HEIGHT : (usr->d == 2 ? M_HEIGHT : E_HEIGHT);
 	int w = usr->d == 3 ? H_WIDTH : (usr->d == 2 ? M_WIDTH : E_WIDTH);
 	// reallocates based on new board size
-	*gameBoard = realloc(*gameBoard, sizeof(tile*) * w);
+	gameBoard = realloc(gameBoard, sizeof(tile*) * w);
 	for(int i = 0; i < w; i++){
-		gameBoard[i] = malloc(sizeof(tile) * h);
+		gameBoard[i] = realloc(gameBoard[i], sizeof(tile) * h);
 	
 		for(int j = 0; j < h; j++){
 			gameBoard[i][j].disp = '#';

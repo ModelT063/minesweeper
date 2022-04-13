@@ -1,13 +1,6 @@
-TO-DO LIST
-in no order
+# TO-DO LIST
 
-1.) Make the game replayable
-2.) Update Bomb making algorithm
-3.) User can't enter 2 digit numbers/user can enter numbers that break the system
-4.) Bombs possibly not on the right hand side of the hard difficulty?
-5.) Play around with board sizes and bomb #s to find a good combo for difficulty system
-6.) Make entire board visible upon game end
-7.) Make flags non-revealable and toggleable
-8.) set 'r' as the reveal tile key, other keys do nothing
-9.) add a timer potentially?
-
+* Fix replayability issues
+* Make input validation more robust
+* Add a timer
+* Implement a custom game
