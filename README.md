@@ -1,4 +1,4 @@
-# Commnand Line Minesweeper
+# Command Line Minesweeper
 
 A renewal of one of my first coding projects (now lost to time) but in C instead of python, and arguably much better in many ways.  
 Still working out the kinks and creating better functionality inbetween classes.  
