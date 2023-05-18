@@ -13,6 +13,7 @@ Downloading the .c and .h files and manually compiling is currently the only way
 2. Enter an action
     * r (reveal) - will uncover the selected tile and if a 0, subsequent tiles around it
     * f (flag) - will flag/unflag the selected tile, flagged tiles cannot be revealed unless unflagged
+    * q (quit) - exits the game
 3. Choose the location
     * Enter in a column number followed by a row number and watch the board update with your selection
 4. Play again!
