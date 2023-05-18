@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <time.h>
+#include <ncurses.h>
+#include <unistd.h>
 
 tile **initializeBoard(int difficulty)
 {
@@ -242,7 +244,15 @@ void boardReveal(tile **gameBoard, int difficulty)
 void gameReset(tile **gameBoard, UsrIn *usr)
 {
 	//  reprompts user for difficulty
-	usr->d = printMenu();
+	usr->d = difficultyMenu();
+
+	if (usr->d == 5)
+	{
+		usr->choice = 'q';
+		usr->d = 3;
+	} // chose exit on menu
+	if (usr->d == 4)
+		usr->d = 3; // custom not implemented
 
 	int h = usr->d == 3 ? H_HEIGHT : (usr->d == 2 ? M_HEIGHT : E_HEIGHT);
 	int w = usr->d == 3 ? H_WIDTH : (usr->d == 2 ? M_WIDTH : E_WIDTH);
@@ -329,20 +339,116 @@ void printBoard(tile **gameBoard, int difficulty)
 	}
 }
 
-int printMenu()
+void printDiffMenu(WINDOW *window, int highlight, int nChoices, char **choices)
 {
-	int choice = 0;
-	do
-	{
-		printf("Choose your difficulty:\n\tEasy - 1\n\tMedium - 2\n\tHard - 3\n\nEnter: ");
-		scanf("%d", &choice);
-		clear();
-	} while (choice <= 0 || choice >= 4);
+	int x = 2;
+	int y = 4;
+	box(window, 0, 0);
 
+	char *str1 = "Use arrow keys to go up and down";
+	char *str2 = "Press enter to select a difficulty";
+	// use hardcoded length of strings to center them in the box
+	mvwprintw(window, 1, window->_maxx / 2 - 32 / 2, str1);
+	mvwprintw(window, 2, window->_maxx / 2 - 34 / 2, str2);
+
+	for (int i = 0; i < nChoices; ++i)
+	{
+		if (highlight == i + 1) /* High light the present choice */
+		{
+			wattron(window, A_REVERSE);
+			if (i == nChoices - 1)
+				mvwprintw(window, y + 1, x, "%s", choices[i]); // prints exit 1 space away
+			else
+				mvwprintw(window, y, x, "%s", choices[i]);
+			wattroff(window, A_REVERSE);
+		}
+		else if (i == nChoices - 1)
+			mvwprintw(window, y + 1, x, "%s", choices[i]); // prints exit 1 space away
+		else
+			mvwprintw(window, y, x, "%s", choices[i]);
+		++y;
+	}
+	wrefresh(window);
+}
+
+void printLogo(int col)
+{
+	int printX = col / 2 - 82 / 2; /*82 is length of logo*/
+	mvprintw(1, printX, "   ________    ____   __  ____                                                   \n");
+	mvprintw(2, printX, "  / ____/ /   /  _/  /  |/  (_)___  ___  ______      _____  ___  ____  ___  _____\n");
+	mvprintw(3, printX, " / /   / /    / /   / /|_/ / / __ \\/ _ \\/ ___/ | /| / / _ \\/ _ \\/ __ \\/ _ \\/ ___/\n");
+	mvprintw(4, printX, "/ /___/ /____/ /   / /  / / / / / /  __(__  )| |/ |/ /  __/  __/ /_/ /  __/ /    \n");
+	mvprintw(5, printX, "\\____/_____/___/  /_/  /_/_/_/ /_/\\___/____/ |__/|__/\\___/\\___/ .___/\\___/_/  \n");
+	mvprintw(6, printX, "                                                             /_/                 \n");
+}
+
+int difficultyMenu()
+{
+	char *choices[] = {
+		"Easy",
+		"Medium",
+		"Hard",
+		"Custom",
+		"Exit"};
+	int nChoices = 5;
+	int row, col;
+	int choice = 0;
+	int c;
+	int highlight = 1;
+
+	// init window
+	initscr();
+	getmaxyx(stdscr, row, col);
+	clear();
+	noecho();
+	cbreak();
+
+	// define the window for the menu
+	WINDOW *window = newwin(row / 2, 2 * col / 3, row / 4, col / 6);
+
+	// enable directional keys
+	keypad(window, TRUE);
+
+	printLogo(col);
+	refresh();
+	printDiffMenu(window, highlight, nChoices, choices);
+	while (1)
+	{
+		// gets user input
+		c = wgetch(window);
+		switch (c)
+		{
+		case KEY_UP:
+			if (highlight == 1)
+				highlight = nChoices;
+			else
+				--highlight;
+			break;
+		case KEY_DOWN:
+			if (highlight == nChoices)
+				highlight = 1;
+			else
+				++highlight;
+			break;
+		case 10: // enter is pressed
+			choice = highlight;
+			break;
+		default:
+			// do nothing if other character is pressed
+			break;
+		}
+		printDiffMenu(window, highlight, nChoices, choices);
+		if (choice != 0) /* User did a choice come out of the infinite loop */
+			break;
+	}
+
+	clrtoeol();
+	refresh();
+	endwin();
 	return choice;
 }
 
-void clear(void)
+void clearWindow()
 {
 	// clears input buffer
 	while (getchar() != '\n')

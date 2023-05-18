@@ -6,9 +6,14 @@ int main(void)
 {
 	UsrIn usr = {'y', 0, 0, 0};
 	bool lose = false;
-	// prints welcome message and difficulty selector
-	printf("Welcome to Command Line Minesweeper!\n");
-	usr.d = printMenu();
+
+	// shows main title and difficulty selector
+	usr.d = difficultyMenu();
+
+	if (usr.d == 5)
+		return 0; // chose exit on menu
+	if (usr.d == 4)
+		usr.d = 3; // custom not implemented
 
 	// creates gameboard
 	tile **gameBoard = initializeBoard(usr.d);
@@ -28,7 +33,7 @@ int main(void)
 		scanf("%d", &usr.w);
 		printf("Row: ");
 		scanf("%d", &usr.h);
-		clear();
+		clearWindow();
 
 		// Write function to validate usr input
 
@@ -51,7 +56,7 @@ int main(void)
 
 				printf("\nWould you like to play again?\n\nEnter 'y' or 'n': ");
 				usr.choice = getchar();
-				clear();
+				clearWindow();
 			}
 
 			if (usr.choice == 'n')

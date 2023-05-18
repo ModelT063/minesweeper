@@ -64,10 +64,10 @@ void gameReset(tile **gameBoard, UsrIn *usr);
 void printBoard(tile **board, int difficulty);
 
 // prints difficulty menu to the terminal
-int printMenu();
+int difficultyMenu();
 
 // clears input buffer and terminal screen
-void clear(void);
+void clearWindow(void);
 
 // frees the memory allocated by the game board
 void freeBoard(tile **board, int difficulty);
